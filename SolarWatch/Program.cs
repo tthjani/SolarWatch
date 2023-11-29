@@ -8,7 +8,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ISunriseSunsetDataProvider, SunsetSunriseSunsetApi>();
+builder.Services.AddSingleton<ISunriseSunsetDataProvider, SunriseSunsetApi>();
 builder.Services.AddSingleton<IJsonProcessor, JsonProcessor>();
 
 var app = builder.Build();
