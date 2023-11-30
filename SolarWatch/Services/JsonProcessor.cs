@@ -5,7 +5,7 @@ namespace SolarWatch.Services;
 
 public class JsonProcessor : IJsonProcessor
 {
-    public SolarWatch Process(string data, string date)
+    public SolarWatch Process(string data, string date, string city)
     {
         JsonDocument json = JsonDocument.Parse(data);
         JsonElement results = json.RootElement.GetProperty("results");
@@ -15,7 +15,7 @@ public class JsonProcessor : IJsonProcessor
         SolarWatch sunriseData = new SolarWatch
         {
             Date = date,
-            City = "Budapest",
+            City = city,
             Sunrise = sunrise.GetString(),
             Sunset = sunset.GetString()
         };
