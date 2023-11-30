@@ -10,6 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ISunriseSunsetDataProvider, SunriseSunsetApi>();
 builder.Services.AddSingleton<IJsonProcessor, JsonProcessor>();
+builder.Services.AddSingleton<ICityNameDataProvider, GeocodingApi>();
+builder.Services.AddSingleton<IGeoJsonProcessor, GeoJsonProcessor>();
 
 var app = builder.Build();
 
