@@ -2,5 +2,5 @@
 
 public interface IJsonProcessor
 {
-    SolarWatch Process(string data, string date);
+    SolarWatch Process(string data, string date, string city);
 }
