@@ -27,14 +27,14 @@ public class SolarWatchController : ControllerBase
     }
     
     [HttpGet("GetSunriseAndSunsetTime")]
-    public ActionResult<SolarWatch> GetCurrent([Required] string city)
+    public async Task<ActionResult<SolarWatch>> GetCurrent([Required] string city)
     {
-        var cityData = _cityNameDataProvider.GetCityCoordinates(city);
-        var jsonData =  _geoJsonProcessor.Process(cityData);
+        var cityData = await _cityNameDataProvider.GetCityCoordinates(city);
+        var jsonData = await _geoJsonProcessor.Process(cityData);
         
         var lat = "";
         var lon = "";
-        string date = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+        var date = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
 
         foreach (var cityName in jsonData)
         {
@@ -44,7 +44,7 @@ public class SolarWatchController : ControllerBase
 
         try
         {
-            var sunriseSunsetData = _sunriseSunsetDataProvider.GetCurrentSunriseSunset(lat, lon, date);
+            var sunriseSunsetData = await _sunriseSunsetDataProvider.GetCurrentSunriseSunset(lat, lon, date);
             return Ok(_jsonProcessor.Process(sunriseSunsetData, date, city));
         }
         catch (Exception e)
