@@ -2,5 +2,5 @@
 
 public interface ISunriseSunsetDataProvider
 {
-    string GetCurrentSunriseSunset(string lat, string lon, string date);
+    Task<string> GetCurrentSunriseSunset(string lat, string lon, string date);
 }
