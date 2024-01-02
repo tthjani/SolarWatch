@@ -4,7 +4,7 @@ namespace SolarWatch.Services;
 
 public class GeoJsonProcessor : IGeoJsonProcessor
 {
-    public List<City> Process(string data)
+    public async Task<List<City>> Process(string data)
     {
         List<City> cities = new List<City>();
 
