@@ -2,5 +2,5 @@
 
 public interface IGeoJsonProcessor
 {
-   Task<List<City>> Process(string data);
+   Task<City?> Process(string data);
 }
