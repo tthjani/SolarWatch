@@ -4,9 +4,9 @@ namespace SolarWatch.Services;
 
 public class GeoJsonProcessor : IGeoJsonProcessor
 {
-    public async Task<List<City>> Process(string data)
+    public async Task<City?> Process(string data)
     {
-        List<City> cities = new List<City>();
+        //List<City> cities = new List<City>();
 
         JsonDocument json = JsonDocument.Parse(data);
         JsonElement root = json.RootElement;
@@ -18,18 +18,22 @@ public class GeoJsonProcessor : IGeoJsonProcessor
                 JsonElement name = cityElement.GetProperty("name");
                 JsonElement lon = cityElement.GetProperty("lon");
                 JsonElement lat = cityElement.GetProperty("lat");
+                JsonElement country = cityElement.GetProperty("country");
+                //JsonElement state = cityElement.GetProperty("state");
 
                 City cityData = new City
                 {
                     Name = name.GetString(),
                     Longitude = lon.GetDouble().ToString(), 
-                    Latitude = lat.GetDouble().ToString()
+                    Latitude = lat.GetDouble().ToString(),
+                    Country = country.GetString(),
+                    //State = state.GetString()
                 };
 
-                cities.Add(cityData);
+                return cityData;
             }
         }
 
-        return cities;
+        return null;
     }
 }
