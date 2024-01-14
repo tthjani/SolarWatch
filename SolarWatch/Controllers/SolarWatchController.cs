@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using SolarWatch.Repository;
 using SolarWatch.Services;
 
 namespace SolarWatch.Controllers;
@@ -16,36 +17,50 @@ public class SolarWatchController : ControllerBase
     private IJsonProcessor _jsonProcessor;
     private ICityNameDataProvider _cityNameDataProvider;
     private IGeoJsonProcessor _geoJsonProcessor;
+    private ICityRepository _cityRepository;
+    private ISunriseSunsetRepository _sunriseSunsetRepository;
     
-    public SolarWatchController(ILogger<SolarWatchController> logger, ISunriseSunsetDataProvider sunriseSunsetDataProvider, IJsonProcessor jsonProcessor, ICityNameDataProvider cityNameDataProvider, IGeoJsonProcessor geoJsonProcessor)
+    public SolarWatchController(ILogger<SolarWatchController> logger, ISunriseSunsetDataProvider sunriseSunsetDataProvider, IJsonProcessor jsonProcessor, ICityNameDataProvider cityNameDataProvider, IGeoJsonProcessor geoJsonProcessor, ICityRepository cityRepository, ISunriseSunsetRepository sunriseSunsetRepository)
     {
         _logger = logger;
         _sunriseSunsetDataProvider = sunriseSunsetDataProvider;
         _jsonProcessor = jsonProcessor;
         _cityNameDataProvider = cityNameDataProvider;
         _geoJsonProcessor = geoJsonProcessor;
+        _cityRepository = cityRepository;
+        _sunriseSunsetRepository = sunriseSunsetRepository;
     }
     
     [HttpGet("GetSunriseAndSunsetTime")]
-    public async Task<ActionResult<SolarWatch>> GetCurrent([Required] string city)
+    public async Task<ActionResult<SunriseSunsetTimes>> GetCurrent([Required] string city)
     {
-        var cityData = await _cityNameDataProvider.GetCityCoordinates(city);
-        var jsonData = await _geoJsonProcessor.Process(cityData);
-        
-        var lat = "";
-        var lon = "";
-        var date = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+        var res = await _cityRepository.FindCityByName(city);
 
-        foreach (var cityName in jsonData)
+        if (res == null)
         {
-            lat = cityName.Latitude;
-            lon = cityName.Longitude;
+            var cityData = await _cityNameDataProvider.GetCityCoordinates(city);
+            var jsonData = await _geoJsonProcessor.Process(cityData);
+            
+            if (jsonData == null)
+            {
+                return BadRequest();
+            }
+            _cityRepository.AddCity(jsonData);
+            
+            res = jsonData;
         }
+        
+            var lat = res.Latitude;
+            var lon = res.Longitude;
+            var date = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+            
 
         try
         {
             var sunriseSunsetData = await _sunriseSunsetDataProvider.GetCurrentSunriseSunset(lat, lon, date);
-            return Ok(_jsonProcessor.Process(sunriseSunsetData, date, city));
+            var sunriseSunsetAdd = _jsonProcessor.Process(sunriseSunsetData, res.Id);
+            await _sunriseSunsetRepository.AddSunriseSunsetTime(sunriseSunsetAdd);
+            return Ok(sunriseSunsetAdd);
         }
         catch (Exception e)
         {
