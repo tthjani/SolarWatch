@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatch.Repository;
 using SolarWatch.Services;
@@ -31,32 +32,32 @@ public class SolarWatchController : ControllerBase
         _sunriseSunsetRepository = sunriseSunsetRepository;
     }
     
-    [HttpGet("GetSunriseAndSunsetTime")]
+    [HttpGet("GetSunriseAndSunsetTime"), Authorize(Roles = "Admin")]
     public async Task<ActionResult<SunriseSunsetTimes>> GetCurrent([Required] string city)
     {
-        var res = await _cityRepository.FindCityByName(city);
-
-        if (res == null)
+        try
         {
-            var cityData = await _cityNameDataProvider.GetCityCoordinates(city);
-            var jsonData = await _geoJsonProcessor.Process(cityData);
-            
-            if (jsonData == null)
+            var res = await _cityRepository.FindCityByName(city);
+
+            if (res == null)
             {
-                return BadRequest();
-            }
-            _cityRepository.AddCity(jsonData);
+                var cityData = await _cityNameDataProvider.GetCityCoordinates(city);
+                var jsonData = await _geoJsonProcessor.Process(cityData);
             
-            res = jsonData;
-        }
+                if (jsonData == null)
+                {
+                    return BadRequest();
+                }
+                _cityRepository.AddCity(jsonData);
+            
+                res = jsonData;
+            }
         
             var lat = res.Latitude;
             var lon = res.Longitude;
             var date = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
             
-
-        try
-        {
+            
             var sunriseSunsetData = await _sunriseSunsetDataProvider.GetCurrentSunriseSunset(lat, lon, date);
             var sunriseSunsetAdd = _jsonProcessor.Process(sunriseSunsetData, res.Id);
             await _sunriseSunsetRepository.AddSunriseSunsetTime(sunriseSunsetAdd);
@@ -65,10 +66,17 @@ public class SolarWatchController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, "Error getting sunrise and sunset data");
+            Console.WriteLine("----------------------------------------------------asd");
+            Console.WriteLine(e);
             return NotFound("Error getting sunrise and sunset data");
         }
     }
-    
+
+    [HttpGet("Test"), Authorize(Roles="Admin")]
+    public IActionResult Test()
+    {
+        return Ok();
+    }
     //Test the other api
     
     /*[HttpGet("GetCityCoordinates")]
