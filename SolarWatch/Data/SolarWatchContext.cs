@@ -11,11 +11,11 @@ public class SolarWatchContext : DbContext
     {
     }
     
-    /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(
             "Server=localhost,1435;Database=focused_beaver;User Id=sa;Password=yourStrong(!)Password;Encrypt=false;");
-    }*/
+    }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
